@@ -31,3 +31,7 @@ This RMD contains statistical analysis of correelation between masting and tempe
 2) Stats--pinus sylvestris.Rmd
 
 This RMD contains statistical analysis of correelation between masting and temperature for Pinus Sylvestris
+
+**PDFs of RMDs**
+
+Folder contains knitted PDFs of selected RMD files. Plots can be seen there.
