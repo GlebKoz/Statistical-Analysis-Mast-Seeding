@@ -22,7 +22,7 @@ This RMD has initial versions of masting threshold functions, UPDATED versions o
 
 This RMD contains my initial attempts to statistical analysis. 
 
-**Stats RMDS**
+**Stats RMDs**
 
 1) Stats--picea engelmannii.Rmd
 
