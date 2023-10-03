@@ -3,4 +3,4 @@ Statistical Analysis of Mast Seeding: Exploration of the ecological phenomenon o
 
 Dataset: MASTREE_climate_2.csv
 
-MASTREE_climate_2.csv contains about a half of original ([  ](https://mastreeplus.shinyapps.io/mastreeplus/)MASTREE dataset) together with corresponding climate variables.
+MASTREE_climate_2.csv contains about a half of original mastree dataset ([https://mastreeplus.shinyapps.io/mastreeplus/](https://mastreeplus.shinyapps.io/mastreeplus/)) together with corresponding climate variables.
