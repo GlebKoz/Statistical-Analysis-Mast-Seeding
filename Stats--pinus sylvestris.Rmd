@@ -1,0 +1,945 @@
+---
+title: "Ultimate stats"
+author: "Gleb Kozienko"
+date: "2023-07-18"
+output: pdf_document
+---
+
+Upload useful libraries
+```{r}
+library(readr)
+library(dplyr)
+library(stringr)   
+library(tidyverse)
+library(lubridate)
+library(ggplot2)
+library(gridExtra) #allows me to plot multiple graphs together
+library(ggpubr) #allows me to plot multiple graphs together
+
+library(Ckmeans.1d.dp)
+library(RColorBrewer)
+
+library(EnvStats)
+
+library(infer)
+
+library(lme4)
+
+library(boot)
+install.packages("ggResidpanel")
+library(ggResidpanel)  
+```
+
+Get dataset
+```{r}
+MASTREE_climate_2 <- read_csv("Desktop/CURI/R code/Mastree datasets/MASTREE_climate_2.csv")
+```
+
+
+
+
+
+
+
+
+
+
+The provided R code performs data manipulation and filtering on the "mastree_continuous" dataset to create subsets for different tree species. The code then groups and summarizes the data based on the species, alpha number, and length, and prints the top 50 results for each combination. Finally, the code creates separate datasets for each tree species (Fagus, Quercus, Fraxinus, Picea, and Pinus) using the filtered data
+```{r}
+# Filter "mastree_continuous" dataset to get only continuous variables with Unit not equal to "index"
+mastree_continuous <- MASTREE_climate_2 |>
+  filter(VarType == "C", Unit != "index")
+
+# Get unique species from the "mastree_continuous" dataset
+all_species <- mastree_continuous$Species |> unique()
+
+# Group and summarize the "mastree_continuous" data based on Species, Alpha_Number, and Length,
+# and print the top 50 results sorted by Length in descending order
+mastree_continuous |>
+  group_by(Species, Alpha_Number, Length) |>
+  summarise(n = n()) |>
+  arrange(desc(Length)) |>
+  print(n = 50)
+
+# Filter unique species to get those containing "Fagus" in their name
+fagus <- all_species[str_detect(all_species, "Fagus")]
+
+# Filter unique species to get those containing "Quercus" in their name
+quercus <- all_species[str_detect(all_species, "Quercus")]
+
+# Filter unique species to get those containing "Fraxinus" in their name
+fraxinus <- all_species[str_detect(all_species, "Fraxinus")]
+
+# Filter unique species to get those containing "Picea" in their name
+picea <- all_species[str_detect(all_species, "Picea")]
+
+# Filter unique species to get those containing "Pinus" in their name
+pinus <- all_species[str_detect(all_species, "Pinus")]
+
+# Create subsets for each tree species based on the filtered unique species
+fagus_data <- mastree_continuous |>
+  filter(Species %in% fagus)
+
+quercus_data <- mastree_continuous |>
+  filter(Species %in% quercus)
+
+fraxinus_data <- mastree_continuous |>
+  filter(Species %in% fraxinus)
+
+picea_data <- mastree_continuous |>
+  filter(Species %in% picea)
+
+pinus_data <- mastree_continuous|>
+  filter(Species %in% pinus)
+
+
+
+# Group and summarize the "fagus_data" dataset based on Coords, Alpha_Number, and Species,
+# calculate the count (n) for each group, and print the top 25 results sorted by count in descending order.
+fagus_data |>
+  group_by(Coords, Alpha_Number, Species) |>
+  summarise(n = n()) |>
+  arrange(desc(n)) |>
+  print(n = 25)
+
+
+quercus_data|>
+  group_by(Coords, Alpha_Number, Species)|>
+  summarise(n=n())|>
+  arrange(desc(n))|>
+  print(n=25)
+
+fraxinus_data|>
+  group_by(Coords, Alpha_Number, Species)|>
+  summarise(n=n())|>
+  arrange(desc(n))|>
+  print(n=25)
+
+picea_data|>
+  group_by(Coords, Alpha_Number, Species)|>
+  summarise(n=n())|>
+  arrange(desc(n))|>
+  print(n=25)
+
+pinus_data|>
+  group_by(Coords, Alpha_Number, Species)|>
+  summarise(n=n())|>
+  arrange(desc(n))|>
+  print(n=25)
+```
+
+The provided R code creates different subsets of data for specific tree species and locations from the previously filtered datasets. Each subset corresponds to a specific species and location identified by "Coords" and "Alpha_Number" values.
+```{r}
+# Create a subset for Fagus sylvatica at Coords "49, 11.4" and Alpha_Number "3024" from fagus_data
+fagus_sylvatica_at_49_11.4_from_3024 <- fagus_data |>
+  filter(Coords == "49, 11.4", Alpha_Number == "3024")
+
+# Create a subset for Fagus sylvatica at Coords "49.8, 22.2" and Alpha_Number "6013" from fagus_data
+fagus_sylvatica_at_49.8_22.2_from_6013 <- fagus_data |>
+  filter(Coords == "49.8, 22.2", Alpha_Number == "6013")
+
+# Create a subset for Quercus chapmanii at Coords "27.2, -81.3", Alpha_Number "5001" from quercus_data
+quercus_chapmanii_at_27.2_minus81.3_from_5001 <- quercus_data |>
+  filter(Coords == "27.2, -81.3", Alpha_Number == "5001", Species == "Quercus chapmanii")
+
+# Create a subset for Quercus geminata at Coords "27.2, -81.3", Alpha_Number "5001" from quercus_data
+quercus_geminata_at_27.2_minus81.3_from_5001 <- quercus_data |>
+  filter(Coords == "27.2, -81.3", Alpha_Number == "5001", Species == "Quercus geminata")
+
+# Create a subset for Picea engelmannii at Coords "39.9, -105.9", Alpha_Number "0234" from picea_data
+picea_engelmannii_at_39.9_minus105.9_from_0234 <- picea_data |>
+  filter(Coords == "39.9, -105.9", Alpha_Number == "0234")
+
+# Create a subset for Picea glauca at Coords "64.7, -148.3", Alpha_Number "5071" from picea_data
+picea_glauca_at_64.7_minus148.3_from_5071 <- picea_data |>
+  filter(Coords == "64.7, -148.3", Alpha_Number == "5071")
+
+# Create a subset for Picea abies at Coords "49.8, 22.2", Alpha_Number "6013" from picea_data
+picea_abies_at_49.8_22.2_from_6013 <- picea_data |>
+  filter(Coords == "49.8, 22.2", Alpha_Number == "6013")
+
+# Create a subset for Pinus mugo at Coords "50.1, 17.2", Alpha_Number "2552" from pinus_data
+pinus_mugo_at_50.1_17.2_from_2552 <- pinus_data |>
+  filter(Coords == "50.1, 17.2", Alpha_Number == "2552")
+
+# Create a subset for Pinus sylvestris at Coords "49.8, 22.2", Alpha_Number "6013" from pinus_data
+pinus_sylvestris_at_49.8_22.2_from_6013 <- pinus_data |>
+  filter(Coords == "49.8, 22.2", Alpha_Number == "6013")
+
+```
+
+
+
+
+
+
+
+
+
+
+Set the dataset you want to work with
+```{r}
+current_dataset<-pinus_sylvestris_at_49.8_22.2_from_6013
+```
+
+
+
+
+
+
+
+
+
+
+At some point in our research we noticed the correlations between temperature in some summer months and seed production values. Sara Clifton, our mentor, suggested that we should consider the correlation between the temperature in the hottest month and masting value. This approach worked, yielding good p-values n stuff. 
+Therefore, for all our species, we are testing the correlation between the temperature in the hottest month and masting value. 
+
+However, temperature in the hottest month is not the only variable we consider. 
+Multiple articles pointed to the fact that masting correlates with the differences in temperatures in previous years:
+1)
+Vacchiano, Giorgio, et al. "Spatial patterns and broad‐scale weather cues of beech mast seeding in Europe." New Phytologist 215.2 (2017): 595-608.
+https://nph.onlinelibrary.wiley.com/doi/full/10.1111/nph.14600
+
+2)
+Kelly, Dave, et al. "Of mast and mean: differential‐temperature cue makes mast seeding insensitive to climate change." Ecology Letters 16.1 (2013): 90-98.
+https://onlinelibrary.wiley.com/doi/abs/10.1111/ele.12020
+
+Therefore, we incorporate two other variables: 
+* difference between the max temperature in the current year and a year before
+(i.e., if current year is #0 and year before is #-1, we are looking at (temp diff)=(temp in year#0)-(temp in year #-1) )
+
+* difference between the max temperature in the year before current year and a year two years before current year
+(i.e., if current year is #0, year before is #-1, and year two years before current year is #-2, we are looking at (temp diff)=(temp in year#-1)-(temp in year #-2) )
+
+
+Start by obtaining the hottest temp in the year 
+Run chunk below only if you have one site in the dataset
+```{r}
+current_dataset_hottest_month<-current_dataset|>
+  group_by(Year, Value)|>
+  summarise(max_t=max(temp_2m))
+```
+
+OR
+
+Sometimes you will have a dataset with many sites. Then, before you can proceed with your analysis, you need to average across sites. 
+To do so, use the steps below instead of running the chunk above. 
+
+1) First check data for how many sites is present for each year. It might be the case that some years have observations for more sites than other years (it may or may not affect the results you get)
+```{r}
+current_dataset|>
+  group_by(Year)|>
+  summarise(num_sites=length(unique(Site_number)))
+
+check_num_sites <- current_dataset|>
+  group_by(Year)|>#group by year
+  summarise(num_sites=length(unique(Site_number)))#count how many unique site numbers are there for each year(1 would mean that there are observations from one site only, 2 means observations from two sites, etc)
+
+
+
+#if the line below outputs one number that is not "1", it means that you have more than one site, and amount of sites is the same for each year. so, you need to run the chunks 2) and 3) below
+
+#also, if the line below outputs more than one number, it means that you have more than one site, and some years have observations for more sites than other years. be mindful of that when you average your masting values
+check_num_sites$num_sites|>unique() 
+```
+
+2) Average across sites
+```{r}
+# current_dataset_avg_of_sites<-current_dataset|>
+#   group_by(Year, month, temp_2m)|>
+#   summarise(Value=mean(Value))
+```
+
+3) obtaining the hottest temp in the year
+```{r}
+# current_dataset_hottest_month<-current_dataset_avg_of_sites|>
+#   group_by(Year, Value)|>
+#   summarise(max_t=max(temp_2m))
+```
+
+Set your differences in temperature
+```{r}
+
+
+#create storege for difference values
+dT.01<-rep(NA, nrow(current_dataset_hottest_month))
+
+dT.12<-rep(NA, nrow(current_dataset_hottest_month))
+
+
+
+#find and record differences
+for (i in 1:(nrow(current_dataset_hottest_month)-1)) {
+  
+  dT.01[i + 1] <- current_dataset_hottest_month$max_t[i + 1] - current_dataset_hottest_month$max_t[i]
+  
+}
+
+for (i in 1:(nrow(current_dataset_hottest_month)-2)) {
+  
+  dT.12[i + 2] <- current_dataset_hottest_month$max_t[i + 1] - current_dataset_hottest_month$max_t[i]
+  
+}
+
+#add columns with differences to the dataset
+
+current_dataset_hottest_month_dT<-current_dataset_hottest_month
+
+  current_dataset_hottest_month_dT$dT.01<-dT.01
+  
+  current_dataset_hottest_month_dT$dT.12<-dT.12
+```
+
+
+
+
+
+
+
+
+
+
+Run useful function. See part 3 of the analysis below for explanation why its useful
+```{r}
+ADM_vec <- function(seed_prod_vals) {
+  mean <- mean(seed_prod_vals)
+  abs_val_diff <- abs(seed_prod_vals - mean)
+  sum <- sum(abs_val_diff)
+  n <- length(seed_prod_vals)
+  result <- mean + sum / n
+  return(result)
+}
+```
+
+
+
+
+
+
+
+
+
+
+For each variable, we are doing three types of analysis:
+1) Assess fitness of the data
+a) break the connections between explanatory and response variables by randomly reassigning response values to explanatory values. We do it by permutating over the vector of response values.
+b) for each permutated data, build linear regression model, assess R^2, store it
+c)Use permutated R^2 distributions to assess the p-value for the R^2 value of the original, not permutated data. We asses p-value using cumulative distribution functions and percentiles. 
+
+2) Analyse linear regression model or original data and its slope
+
+3) Analyze the distribution of values of explanatory variables that correlate to a particular responce variable:
+we are interested to know that temperature value would cause the size of seed output to exceed masting threshold
+a) resample original data with replacement
+b) for each resample, build a linear model
+c) determine masting threshold value; then, using coefficients from linear regression of that particular resampling, find the temperature(or difference in temps) that corresponds to the masting threshold
+c) consider the distribution of such temperatures (or differences in temps)
+
+
+
+So, lets apply these types of analysis to our three explanatory variables(current hottest temp, and two differences discussed above)
+
+
+I) correlation between the temperature in the hottest month and masting value. 
+
+1) Assess fitness of the data
+
+a) This function is used in the boot() function below. 
+It takes  permutated the values of response variable from boot() function, makes linear regression of permuted values
+```{r}
+Rsquares3<- function(Data, idx) {
+  #idx parameter is passed into this function by the boot() function
+  #each repetition of boot() function permutates indices and supplies permutated indices here
+  vals_permutated<-Data[idx,2]$Value #access values in permutated order
+  Data_permutated<-Data
+  Data_permutated$Value<-vals_permutated #rewrite original values with permutated values
+  
+  
+  
+  #build linear regression model
+  model<-lm(Value~max_t, data= Data_permutated)
+  model_output<-summary(model)
+  return(model_output$r.squared)#return R^2 value of the model
+}
+```
+
+b) do permutations here 
+```{r}
+#conduct 10000 permutations
+set.seed(228)#makes sure that boot() generates same output for the same input (because seed defines pseudo-randomization algorithm )
+boot_output<-boot::boot(current_dataset_hottest_month_dT, Rsquares3,10000, sim = "permutation")
+
+#make a histograom of R^2 values 
+ggplot()+
+  aes(boot_output$t)+
+  geom_histogram()+
+  geom_vline(xintercept = boot_output$t0 ,colour="red") 
+
+#confidence interval for permutated R^2 values
+boot::boot.ci(boot_output, type = "perc")
+#original R^2 value
+boot_output$t0
+
+
+
+
+#get p-value  
+percentile <- ecdf(boot_output$t) #create empirical cumulative distribution function
+percentile(boot_output$t0) #assess what percentile of original distribution that corresponds to the original R^2 value 
+1-percentile(boot_output$t0) #get p-value
+
+```
+
+
+
+2) Analyse linear regression model or original data and its slope
+```{r}
+#do linear regressions
+lm_0<-lm(Value~max_t, data= current_dataset_hottest_month_dT)
+summary(lm_0) #show coeffs and p-vals
+
+#resid_panel(lm_0)#check how well data fits linear regression model
+#extract coefficients of linear regression
+b_0=lm_0$coefficients[1]
+b_1=lm_0$coefficients[2]
+
+yval<-ADM_vec(current_dataset_hottest_month_dT$Value) #get masting threshold value
+xval<-(yval-b_0)/b_1 #get temperature that corresponds with masting threshold value
+
+
+#present results in the form of a graph
+ggplot(current_dataset_hottest_month_dT, mapping= aes(x=max_t, y=Value))+
+  geom_point() +
+  geom_hline(yintercept = yval,colour="red")+
+  geom_vline(xintercept = xval,colour="red")+
+  geom_smooth(method="lm")
+
+```
+
+
+
+3) Analyze the distribution of values of explanatory variables that correlate to a particular responce variable:
+
+
+a) This function is used in the boot() function below. 
+It takes  resampled values from boot() function, makes linear regression of the sample, outputs temp value that corresponds to masting threshold
+```{r}
+
+temp_dist_stat0<- function(Data, idx) {
+  
+  #while its called "Data_permutated", it is actually a resampling with replacement
+  Data_permutated<-Data[idx,]
+  #build model
+  model<-lm(Value~max_t, data= Data_permutated)
+  #get coefficients
+  b_0=model$coefficients[1]
+  b_1=model$coefficients[2]
+
+#get threshold value  
+yval<-ADM_vec(current_dataset_hottest_month_dT$Value)
+xval<-(yval-b_0)/b_1 #get temp value that corresponds with threshold value 
+  
+  return(xval)
+}
+```
+
+b) bootstrapping happens here
+```{r}
+set.seed(228)#makes sure that boot() generates same output for the same input (because seed defines pseudo-randomization algorithm )
+
+#conduct resampling with replacement, collect  temp values that correspond to masting threshold
+boot_output<-boot::boot(current_dataset_hottest_month_dT, temp_dist_stat0,1000)
+
+
+#temperature distributions as a histogram
+ggplot()+
+  aes(boot_output$t)+
+  geom_histogram()+
+  geom_vline(xintercept = boot_output$t0 ,colour="red")
+# temp distribution as a boxplot
+ggplot()+
+  geom_boxplot(aes(boot_output$t))+
+  geom_vline(xintercept = boot_output$t0 ,colour="red") 
+
+
+#quantiles of distribution
+quantile(boot_output$t, probs =c(0.05, 0.25, 0.5, 0.75, 0.95))
+
+
+
+#build a cumulative distribution function 
+test<-quantile(boot_output$t, probs = seq(0.01, 0.99, by = 0.01))
+
+y <- data.frame(id = seq(0.01, 0.99, by = 0.01), values = test) 
+
+#output of cumulative distribution function
+ggplot()+
+  geom_point(data = y,aes(y=id, x=values))
+  
+```
+
+
+
+
+
+
+II) correlation between the temp difference(max temperature in the current year and a year before) and masting value. 
+
+1) Assess fitness of the data
+
+a) This function is used in the boot() function below. 
+It takes  permutated the values of response variable from boot() function, makes linear regression of permuted values
+```{r}
+Rsquares4<- function(Data, idx) {
+  #idx parameter is passed into this function by the boot() function
+  #each repetition of boot() function permutates indices and supplies permutated indices here
+  vals_permutated<-Data[idx,2]$Value #access values in permutated order
+  Data_permutated<-Data
+  Data_permutated$Value<-vals_permutated #rewrite original values with permutated values
+  
+  
+  
+  #build linear regression model
+  model<-lm(Value~dT.01, data= Data_permutated)
+  model_output<-summary(model)
+  return(model_output$r.squared)#return R^2 value of the model
+}
+```
+
+b) do permutations here 
+```{r}
+#conduct 10000 permutations
+set.seed(228)#makes sure that boot() generates same output for the same input (because seed defines pseudo-randomization algorithm )
+boot_output<-boot::boot(current_dataset_hottest_month_dT, Rsquares4,1000, sim = "permutation")
+
+#make a histograom of R^2 values 
+ggplot()+
+  aes(boot_output$t)+
+  geom_histogram()+
+  geom_vline(xintercept = boot_output$t0 ,colour="red") 
+
+#confidence interval for permutated R^2 values
+boot::boot.ci(boot_output, type = "perc")
+#original R^2 value
+boot_output$t0
+
+
+
+
+#get p-value  
+percentile <- ecdf(boot_output$t) #create empirical cumulative distribution function
+percentile(boot_output$t0) #assess what percentile of original distribution that corresponds to the original R^2 value 
+1-percentile(boot_output$t0) #get p-value
+
+
+```
+
+
+
+2) Analyse linear regression model or original data and its slope
+
+```{r}
+#do linear regression
+lm_01<-lm(Value~dT.01, data= current_dataset_hottest_month_dT)
+summary(lm_01)#show coeffs and p-vals
+
+resid_panel(lm_01)#check how well data fits linear regression model
+#extract coefficients of linear regression
+b_0=lm_01$coefficients[1]
+b_1=lm_01$coefficients[2]
+
+yval<-ADM_vec(current_dataset_hottest_month_dT$Value) #get masting threshold value
+xval<-(yval-b_0)/b_1 #get temperature that corresponds with masting threshold value
+
+
+#present results in the form of a graph
+ggplot(current_dataset_hottest_month_dT, mapping= aes(x=dT.01, y=Value))+
+  geom_point() +
+ geom_hline(yintercept = yval,colour="red")+
+  geom_vline(xintercept = xval,colour="red")+
+  geom_smooth(method="lm")
+
+```
+
+We do not attempt to assess the distribution of values of explanatory variables that correlate to the masting threshold value for temp difference(max temperature in the current year and a year before), because for all species we had examined, this variable did not show a significant correlation with masting 
+
+
+
+
+
+III) correlation between the temp difference(difference between the max temperature in the year before current year and a year two years before current year) and masting value. 
+
+1) Assess fitness of the data
+
+a) This function is used in the boot() function below. 
+It takes  permutated the values of response variable from boot() function, makes linear regression of permuted values
+```{r}
+Rsquares5<- function(Data, idx) {
+  #idx parameter is passed into this function by the boot() function
+  #each repetition of boot() function permutates indices and supplies permutated indices here
+  vals_permutated<-Data[idx,2]$Value #access values in permutated order
+  Data_permutated<-Data
+  Data_permutated$Value<-vals_permutated #rewrite original values with permutated values
+  
+  
+  
+  #build linear regression model
+  model<-lm(Value~dT.12, data= Data_permutated)
+  model_output<-summary(model)
+  return(model_output$r.squared)#return R^2 value of the model
+}
+```
+
+b) do permutations here 
+```{r}
+#conduct 10000 permutations
+set.seed(228)#makes sure that boot() generates same output for the same input (because seed defines pseudo-randomization algorithm )
+boot_output<-boot::boot(current_dataset_hottest_month_dT, Rsquares5,10000, sim = "permutation")
+
+#make a histograom of R^2 values 
+ggplot()+
+  aes(boot_output$t)+
+  geom_histogram()+
+  geom_vline(xintercept = boot_output$t0 ,colour="red") 
+
+#confidence interval for permutated R^2 values
+boot::boot.ci(boot_output, type = "perc")
+#original R^2 value
+boot_output$t0
+
+
+
+
+#get p-value  
+percentile <- ecdf(boot_output$t) #create empirical cumulative distribution function
+percentile(boot_output$t0) #assess what percentile of original distribution that corresponds to the original R^2 value 
+1-percentile(boot_output$t0) #get p-value
+
+
+```
+
+
+
+2) Analyse linear regression model or original data and its slope
+
+```{r}
+#do linear regression
+lm_12<-lm(Value~dT.12, data= current_dataset_hottest_month_dT)
+summary(lm_12)#show coeffs and p-vals
+
+#resid_panel(lm_12)#check how well data fits linear regression model
+#extract coefficients of linear regression
+b_0=lm_12$coefficients[1]
+b_1=lm_12$coefficients[2]
+
+yval<-ADM_vec(current_dataset_hottest_month_dT$Value) #get masting threshold value
+xval<-(yval-b_0)/b_1 #get temperature that corresponds with masting threshold value
+
+
+#present results in the form of a graph
+ggplot(current_dataset_hottest_month_dT, mapping= aes(x=dT.12, y=Value))+
+  geom_point() +
+ geom_hline(yintercept = yval,colour="red")+
+  geom_vline(xintercept = xval,colour="red")+
+  geom_smooth(method="lm")
+
+```
+
+
+
+3) Analyze the distribution of values of explanatory variables that correlate to a particular responce variable:
+
+
+a) This function is used in the boot() function below. 
+It takes  resampled values from boot() function, makes linear regression of the sample, outputs temp value that corresponds to masting threshold
+```{r}
+
+temp_dist_stat12<- function(Data, idx) {
+  
+  #while its called "Data_permutated", it is actually a resampling with replacement
+  Data_permutated<-Data[idx,]
+  #build model
+  model<-lm(Value~dT.12, data= Data_permutated)
+  #get coefficients
+  b_0=model$coefficients[1]
+  b_1=model$coefficients[2]
+
+#get threshold value  
+yval<-ADM_vec(current_dataset_hottest_month_dT$Value)
+xval<-(yval-b_0)/b_1 #get temp value that corresponds with threshold value 
+  
+  return(xval)
+}
+```
+
+b) bootstrapping happens here
+```{r}
+set.seed(228)#makes sure that boot() generates same output for the same input (because seed defines pseudo-randomization algorithm )
+
+#conduct resampling with replacement, collect  temp values that correspond to masting threshold
+boot_output<-boot::boot(current_dataset_hottest_month_dT, temp_dist_stat12,1000)
+
+
+#temperature distributions as a histogram
+ggplot()+
+  aes(boot_output$t)+
+  geom_histogram()+
+  geom_vline(xintercept = boot_output$t0 ,colour="red")
+# temp distribution as a boxplot
+ggplot()+
+  geom_boxplot(aes(boot_output$t))+
+  geom_vline(xintercept = boot_output$t0 ,colour="red") 
+
+
+#quantiles of distribution
+quantile(boot_output$t, probs =c(0.05, 0.25, 0.5, 0.75, 0.95))
+
+
+
+#build a cumulative distribution function 
+test<-quantile(boot_output$t, probs = seq(0.01, 0.99, by = 0.01))
+
+y <- data.frame(id = seq(0.01, 0.99, by = 0.01), values = test) 
+
+#output of cumulative distribution function
+ggplot()+
+  geom_point(data = y,aes(y=id, x=values))
+  
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EXTRA: SOME ANALYSIS THAT WE DID, BUT DID NOT FIND IT Particularly HELPFUL
+TAKE A LOOK IF CURIOUS
+
+I) For some species, we found that both maximum temp in a given month and temp difference(difference between the max temperature in the year before current year and a year two years before current year) show correlation with seed production. 
+Thus, we decided to check if there is a correlation between maximum temp in a given month and temp difference(difference between the max temperature in the year before current year and a year two years before current year). 
+For species that we looked for, such correlation was absent. 
+
+You can assess this correlation with the code below.
+```{r}
+ggplot(current_dataset_hottest_month_dT, mapping= aes(y=dT.12, x=max_t))+
+  geom_point() +
+  geom_smooth(method="lm")
+```
+
+
+
+
+
+II) After we observed significant slope for correlation between the max temp in a year and seed production, we decided to see if the trend will still be there if we consider mast years and nonmast years separately. 
+For species that we checked, after we  correlation between the max temp in a year and seed production was shown to be insignificant if we consider mast and nonmast years separately.
+
+Here is the code:
+```{r}
+mast_treshold<-ADM_vec(current_dataset_hottest_month_dT$Value) #define threshold
+
+#get data for mast years only
+current_dataset_hottest_month_dT_mast<-current_dataset_hottest_month_dT|>
+  filter(Value>=mast_treshold)
+
+#get data for non-mast years only
+current_dataset_hottest_month_dT_nonmast<-current_dataset_hottest_month_dT|>
+  filter(Value<mast_treshold)
+
+
+
+# for mast years:
+
+#conduct linear regression
+lm_0<-lm(Value~max_t, data= current_dataset_hottest_month_dT_mast)
+summary(lm_0)
+
+#assess residuals
+resid_panel(lm_0)
+
+#see scatterplot of the relationship
+ggplot(current_dataset_hottest_month_dT_mast, mapping= aes(x=max_t, y=Value))+
+  geom_point() +
+  geom_smooth(method="lm")
+
+
+
+#for nonmast years
+
+#conduct linear regression
+lm_0<-lm(Value~max_t, data= current_dataset_hottest_month_dT_nonmast)
+summary(lm_0)
+#assess residuals
+resid_panel(lm_0)
+
+
+#see scatterplot of the relationship
+ggplot(current_dataset_hottest_month_dT_nonmast, mapping= aes(x=max_t, y=Value))+
+  geom_point() +
+  geom_smooth(method="lm")
+
+```
+
+
+
+
+
+
+III) At some point we were wondering if seed production correlates with years since last masting event.
+Basically it is a test of the resource storage hypothesis, also known as resource budget model
+(description of the resource budget model https://nph.onlinelibrary.wiley.com/doi/abs/10.1111/nph.14114)
+
+1)Create another column in the dataset that classifies years as mast and non-mast
+```{r}
+mast_val_num<-ADM_vec(current_dataset_hottest_month_dT$Value)
+current_dataset_hottest_month_dT<-current_dataset_hottest_month_dT|>
+  mutate(mast_val=ifelse(Value>=mast_val_num,"mast","nonmast"))
+
+```
+
+2)compute years since last masting event for each year
+if first year is mast year, it will be assigned with "NA", because assigning any numerical value would be methodologically incorrect (would it?)
+if first year is not mast year, it is assigned with 0.
+For consecutive non-mast years assigned value increases by one up until the mast year. 
+Mast year is assigned with the largest number in the sequence, and year right after mast year is assigned with 0, counting begins again
+```{r}
+count=0 #counts years since last mast event
+period=c() #stores count values
+
+#go through each row
+for (i in 1:nrow(current_dataset_hottest_month_dT)){
+  
+  #if first year is mast year, it will be assigned with "NA", because assigning any numerical value would be methodologically incorrect (would it?)
+  if (current_dataset_hottest_month_dT$mast_val[i]=="mast" & length(period)==0) {
+    
+period=c(period, NA)
+count=0
+    
+#Mast year is assigned with the largest number in the sequence
+} else if ( current_dataset_hottest_month_dT$mast_val[i]=="mast") {
+  period=c(period, count)
+  count=0# and year right after mast year is assigned with 0
+
+  #For consecutive non-mast years assigned value increases by one up until the mast year. 
+} else {
+  period=c(period, count)
+  count=count+1
+}
+  
+}
+
+current_dataset_hottest_month_dT$period<-period
+
+```
+
+3) assess the relationsip
+```{r}
+#make linear regression model
+lm_period<-lm(Value~period, data= current_dataset_hottest_month_dT)
+#obseve your model
+summary(lm_period)
+
+#assess residuals
+resid_panel(lm_period)
+
+#scatterplot of  seed production vs years since last masting event
+ggplot(current_dataset_hottest_month_dT, mapping= aes(x=period, y=Value))+
+  geom_point() +
+  geom_smooth(method="lm")
+
+```
+
+
+
+
+
+
+IV) At some point we decided to conduct multivariable analysis (multiple linear regression) of climatic variables. Here we consider temperature in a certain month and precipitation at a certain month as separate variables (such approach is questionable because climate is autocorrelated and stuff... There are ways to assess autocorrelation: https://cran.r-project.org/web/packages/lme4/vignettes/lmer.pdf  but we did not go that far[and, tbh, our statistical knowledge was not sufficient as well])
+
+Start by preparing data
+Our main data has questionable format: we have 12 rows (one for each month) for each year that are identical in everything but climatic variables (we have a column "month", and each value in climate column corresponds to the month from the same row). Someone might say that better format would be to widen our data so it is 12 times shorter (only one row per year), but 12 times wider (climatic variable in each month is its own column). 
+For the  multivariable analysis, we need our data to have the latter format.
+Thus, we widen it.
+```{r}
+# Extract columns 1 to 39 (excluding column 40) from the 'current_dataset' data frame.
+# Then, pivot the data wider, with the column values of 'temp_2m' spread across multiple columns based on the 'month' column.
+# The new columns will be named with the prefix "t" followed by the corresponding month number.
+current_dataset_main_and_temp <- current_dataset[, c(1:39)] |>
+  pivot_wider(
+    names_from = c(month),
+    values_from = c(temp_2m),
+    names_prefix = "t"
+  )
+
+# Extract columns 1 to 38 and column 40 from the 'current_dataset' data frame.
+# Then, pivot the data wider, with the column values of 'tot_precip' spread across multiple columns based on the 'month' column.
+# The new columns will be named with the prefix "p" followed by the corresponding month number.
+current_dataset_main_and_precip <- current_dataset[, c(1:38, 40)] |>
+  pivot_wider(
+    names_from = c(month),
+    values_from = c(tot_precip),
+    names_prefix = "p"
+  )
+
+# Extract columns 38 to 49 (these contain the monthly precipitation values) from 'current_dataset_main_and_precip'.
+current_dataset_precip <- current_dataset_main_and_precip[, c(38:49)]
+
+# Combine the 'current_dataset_main_and_temp' data frame (containing temperature values) and the 'current_dataset_precip' data frame (containing precipitation values) side by side.
+current_dataset_main_temp_precip <- cbind(current_dataset_main_and_temp, current_dataset_precip)
+
+```
+
+
+
+Multivariable analysis with explanatory variables being temperatures in  particular months
+```{r}
+model <- lm(Value ~ t1 + t2 + t3+t4 + t5 + t6+t7 + t8 + t9+t10 + t11 + t12, data = current_dataset_main_temp_precip)
+summary(model)
+```
+
+
+Multivariable analysis with explanatory variables being precipitations in  particular months
+```{r}
+model <- lm(Value ~ p1 + p2 + p3+p4 + p5 + p6+p7 + p8 + p9+p10 + p11 + p12, data = current_dataset_main_temp_precip)
+summary(model)
+```
+
+Multivariable analysis with explanatory variables being temperatures and precipitations in  particular months (assume that in a particular year seed production is defined by climate and precipitation separately  )
+```{r}
+model <- lm(Value ~t1 + t2 + t3+t4 + t5 + t6+t7 + t8 + t9+t10 + t11 + t12+ p1 + p2 + p3+p4 + p5 + p6+p7 + p8 + p9+p10 + p11 + p12, data = current_dataset_main_temp_precip)
+summary(model)
+```
+
+
+Multivariable analysis with explanatory variables being temperatures and precipitations in  particular months (assume that in a particular year seed production is defined by combination of climate and precipitation in a particular month)
+```{r}
+model <- lm(Value ~ (t1 * p1) + (t2*p2) + (t3 * p3)+(t4 * p4) + (t5*p5) + (t6 * p6)+( t7 * p7) +( t8*p8 )+ (t9 *p9)+(t10 * p10) +( t11*p11) + (t12 * p12), data = current_dataset_main_temp_precip)
+summary(model)
+```
+
+
