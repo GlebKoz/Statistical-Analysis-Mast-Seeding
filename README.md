@@ -1,5 +1,5 @@
 # Statistical-Analysis-Mast-Seeding
-Statistical Analysis of Mast Seeding: Exploration of the ecological phenomenon of mast seeding through climate and tree reproduction data, featuring a novel threshold algorithm and robust statistical tests.
+Statistical Analysis of Mast Seeding: Exploration of the ecological phenomenon of mast seeding through climate and tree reproduction data, featuring a novel threshold algorithm and robust statistical tests. Languages: R, MATLAB
 
 **Dataset: MASTREE_climate_2.csv**
 
@@ -35,3 +35,7 @@ This RMD contains statistical analysis of correelation between masting and tempe
 **PDFs of RMDs**
 
 Folder contains knitted PDFs of selected RMD files. Plots can be seen there.
+
+**MATLAB**
+
+Folder contains functions that use differential and difference equations to simulate predator-prey-resource model of masting phenomenon. model4_recycl_m.m is the main program, other .m files are supplemental functions, and  .fig and .jpg files contain visualization of the model.
